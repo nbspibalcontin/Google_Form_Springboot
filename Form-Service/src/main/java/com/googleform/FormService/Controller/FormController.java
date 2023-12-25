@@ -5,12 +5,16 @@ import com.googleform.FormService.Dto.MessageResponse;
 import com.googleform.FormService.Exception.CodeNotFoundException;
 import com.googleform.FormService.Exception.FormNotFoundException;
 import com.googleform.FormService.Service.Create_Form;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @RestController
 @RequestMapping("api/form")
+@CrossOrigin(origins="*")
 public class FormController {
     private final Create_Form form_service;
 
@@ -30,7 +34,7 @@ public class FormController {
     }
 
     //Get Form by Code
-    @GetMapping("/{code}")
+    @GetMapping("/code/{code}")
     public ResponseEntity<?> findFromByCode(@PathVariable String code) {
         try {
             return ResponseEntity.ok(form_service.getFormByCode(code));

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form List</title>
+</head>
+<body>
+
+<h2>Form List</h2>
+
+<!-- Iterate over the formDtoList -->
+<div th:each="formDto : ${formDtoList}">
+    <div>
+        <strong>ID:</strong> <span th:text="${formDto.id}"></span><br>
+        <strong>Title:</strong> <span th:text="${formDto.title}"></span><br>
+
+        <!-- Iterate over the questionsList within each FormDto -->
+        <ul>
+            <li th:each="question : ${formDto.questionsList}">
+                <!-- Display question and its ID -->
+                <span th:text="${question.id}"></span> - <span th:text="${question.question}"></span>
+                <!-- Create individual inputs for each question.id and question.question -->
+                <input type="text" th:id="${'input_id_' + question.id}" th:name="${'input_id_' + question.id}" th:value="${question.id}">
+                <input type="text" th:id="${'input_question_' + question.id}" th:name="${'input_question_' + question.id}" th:value="${question.question}">
+                <br>
+            </li>
+        </ul>
+    </div>
+    <hr>
+</div>
+
+</body>
+</html>
