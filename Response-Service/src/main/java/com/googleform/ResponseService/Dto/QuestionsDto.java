@@ -1,4 +1,4 @@
-package com.googleform.FormService.Dto;
+package com.googleform.ResponseService.Dto;
 
 import lombok.Data;
 

@@ -6,18 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Questions {
+@Data
+public class Response {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String question;
-    @ManyToOne
-    @JoinColumn(name = "form_id")
-    private Form form;
-    @OneToOne(mappedBy = "questions", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
-    private Response response;
+    private String response;
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "question_id")
+    private Questions questions;
 }

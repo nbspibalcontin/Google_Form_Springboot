@@ -1,4 +1,4 @@
-package com.googleform.FormService.Entity;
+package com.googleform.ResponseService.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

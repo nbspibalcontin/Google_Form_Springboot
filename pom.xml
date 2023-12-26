@@ -13,6 +13,7 @@
         <module>Discovery-Service</module>
         <module>Gateway-Service</module>
         <module>Form-Service</module>
+        <module>Response-Service</module>
     </modules>
 
     <properties>
