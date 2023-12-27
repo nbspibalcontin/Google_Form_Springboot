@@ -1,9 +1,9 @@
-package com.googleform.ResponseService.Dto;
+package com.googleform.ResponseService.Request;
 
 import lombok.Data;
 
 @Data
-public class ResponseDto {
+public class QuestionRequest {
     private Long id;
     private String response;
 }

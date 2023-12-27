@@ -1,7 +1,9 @@
 package com.googleform.ResponseService.Controller;
 
-import com.googleform.ResponseService.Dto.ResponseDto;
+import com.googleform.ResponseService.Exception.FormNotFoundException;
+import com.googleform.ResponseService.Request.ResponseRequest;
 import com.googleform.ResponseService.Service.Response_Service;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,9 +21,11 @@ public class ResponseController {
     }
 
     @PostMapping("/question-response")
-    public ResponseEntity<?> createResponse(@RequestBody ResponseDto responseDto){
+    public ResponseEntity<?> createResponse(@RequestBody ResponseRequest responseDto) {
         try {
-            return ResponseEntity.ok(responseService.createResponse(responseDto));
+            return ResponseEntity.ok(responseService.createResponses(responseDto));
+        } catch (EntityNotFoundException | FormNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }

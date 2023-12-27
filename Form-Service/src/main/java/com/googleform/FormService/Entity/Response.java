@@ -12,10 +12,9 @@ import lombok.NoArgsConstructor;
 public class Response {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long responseId;
     private String response;
     @OneToOne
-    @MapsId
     @JoinColumn(name = "question_id")
     private Questions questions;
 }

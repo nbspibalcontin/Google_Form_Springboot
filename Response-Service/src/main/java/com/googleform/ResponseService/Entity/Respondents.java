@@ -6,15 +6,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-public class Response {
+public class Respondents {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long responseId;
-    private String response;
+    private Long id;
+    private String email;
     @OneToOne
-    @JoinColumn(name = "question_id")
-    private Questions questions;
+    @JoinColumn(name = "form_id")
+    private Form form;
 }
