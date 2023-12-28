@@ -79,6 +79,18 @@ public class Form_Service {
         return randomCode.toString();
     }
 
+    //Find All Form
+    public List<FormDto> findAllForms(){
+        List<Form> formList = formRepository.findAll();
+        return formList.stream().map(this::convertToFormDto).collect(Collectors.toList());
+    }
+
+    //Find All FormWithQuestionsAndResponse
+    public List<FormWithResponseDto> FormWithQuestionsAndResponse(){
+        List<Form> formList = formRepository.findAll();
+        return formList.stream().map(this::convertToFormWithQuestionsAndResponseDto).collect(Collectors.toList());
+    }
+
     //Find Form By Code
     public List<FormRequest> getFormByCode(String code) {
         List<Form> forms = formRepository.findByCode(code);
@@ -87,7 +99,7 @@ public class Form_Service {
             throw new CodeNotFoundException("No Form found containing: " + code);
         }
 
-        return forms.stream().map(this::convertToFormDto).collect(Collectors.toList());
+        return forms.stream().map(this::convertToFormRequest).collect(Collectors.toList());
     }
 
 
@@ -207,7 +219,17 @@ public class Form_Service {
     }
 
     //Convert Form to FormDto
-    private FormRequest convertToFormDto(Form form) {
+    private FormDto convertToFormDto(Form form) {
+        return modelMapper.map(form, FormDto.class);
+    }
+
+    //Convert Form to FormWithQuestionsAndResponseDto
+    private FormWithResponseDto convertToFormWithQuestionsAndResponseDto(Form form) {
+        return modelMapper.map(form, FormWithResponseDto.class);
+    }
+
+    //Convert Form to FormRequest
+    private FormRequest convertToFormRequest(Form form) {
         return modelMapper.map(form, FormRequest.class);
     }
 

@@ -55,6 +55,27 @@ public class FormController {
         }
     }
 
+    //Find All Form
+    @GetMapping("/allForms")
+    public ResponseEntity<?> findAllForms(){
+        try {
+            return ResponseEntity.ok(form_service.findAllForms());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
+
+    //Find All Form With Response
+    @GetMapping("/allForms/response")
+    public ResponseEntity<?> findAllFormsWithResponse(){
+        try {
+            return ResponseEntity.ok(form_service.FormWithQuestionsAndResponse());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
+    }
+
+
     //Find Form with questions and Response by Id
     @GetMapping("/questionAndResponse/{id}")
     public ResponseEntity<?> findFromWithQuestionAndResponseById(@PathVariable Long id) {
