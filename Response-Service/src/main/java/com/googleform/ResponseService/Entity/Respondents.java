@@ -17,4 +17,7 @@ public class Respondents {
     @OneToOne
     @JoinColumn(name = "form_id")
     private Form form;
+    @OneToOne(mappedBy = "respondents", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private Response response;
 }

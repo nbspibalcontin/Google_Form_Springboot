@@ -1,10 +1,10 @@
 package com.googleform.FormService.Controller;
 
-import com.googleform.FormService.Exception.QuestionNotFoundException;
-import com.googleform.FormService.Request.FormRequest;
 import com.googleform.FormService.Dto.MessageResponse;
 import com.googleform.FormService.Exception.CodeNotFoundException;
 import com.googleform.FormService.Exception.FormNotFoundException;
+import com.googleform.FormService.Exception.QuestionNotFoundException;
+import com.googleform.FormService.Request.FormRequest;
 import com.googleform.FormService.Service.Form_Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/form")
-@CrossOrigin(origins="*")
+@CrossOrigin(origins = "*")
 public class FormController {
     private final Form_Service form_service;
 
@@ -57,7 +57,7 @@ public class FormController {
 
     //Find All Form
     @GetMapping("/allForms")
-    public ResponseEntity<?> findAllForms(){
+    public ResponseEntity<?> findAllForms() {
         try {
             return ResponseEntity.ok(form_service.findAllForms());
         } catch (Exception e) {
@@ -67,14 +67,13 @@ public class FormController {
 
     //Find All Form With Response
     @GetMapping("/allForms/response")
-    public ResponseEntity<?> findAllFormsWithResponse(){
+    public ResponseEntity<?> findAllFormsWithResponse() {
         try {
             return ResponseEntity.ok(form_service.FormWithQuestionsAndResponse());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
-
 
     //Find Form with questions and Response by Id
     @GetMapping("/questionAndResponse/{id}")
@@ -103,7 +102,7 @@ public class FormController {
 
     //Update Form title and questions
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateFormAndQuestions(@PathVariable Long id,@RequestBody FormRequest formRequest) {
+    public ResponseEntity<?> updateFormAndQuestions(@PathVariable Long id, @RequestBody FormRequest formRequest) {
         try {
             form_service.updateForm(id, formRequest);
             return ResponseEntity.ok(new MessageResponse("Update Successfully!"));

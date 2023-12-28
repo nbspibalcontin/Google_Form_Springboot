@@ -17,4 +17,7 @@ public class Response {
     @OneToOne
     @JoinColumn(name = "question_id")
     private Questions questions;
+    @ManyToOne // Many responses can be associated with one respondent
+    @JoinColumn(name = "respondents_id")
+    private Respondents respondents;
 }

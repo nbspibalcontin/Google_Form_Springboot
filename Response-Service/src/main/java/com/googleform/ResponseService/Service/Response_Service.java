@@ -6,6 +6,8 @@ import com.googleform.ResponseService.Entity.Questions;
 import com.googleform.ResponseService.Entity.Respondents;
 import com.googleform.ResponseService.Entity.Response;
 import com.googleform.ResponseService.Exception.FormNotFoundException;
+import com.googleform.ResponseService.Exception.RespondentAlreadyExistsException;
+import com.googleform.ResponseService.Exception.ResponseNotFoundException;
 import com.googleform.ResponseService.Repository.FormRepository;
 import com.googleform.ResponseService.Repository.QuestionsRepository;
 import com.googleform.ResponseService.Repository.RespondentsRepository;
@@ -14,6 +16,8 @@ import com.googleform.ResponseService.Request.QuestionRequest;
 import com.googleform.ResponseService.Request.ResponseRequest;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 
 @Service
@@ -30,10 +34,12 @@ public class Response_Service {
         this.formRepository = formRepository;
     }
 
-
     public MessageResponse createResponses(ResponseRequest responseDto) {
         // Retrieve the existing Form based on the provided form ID
         Form existingForm = getExistingForm(responseDto.getFormId());
+
+        // Save the Respondents information
+        Respondents respondents = saveRespondents(responseDto.getEmail(), existingForm);
 
         // Iterate through each question response in the request
         for (QuestionRequest questionRequest : responseDto.getResponses()) {
@@ -47,11 +53,8 @@ public class Response_Service {
             }
 
             // Save the new Response for the current question
-            saveResponse(existingQuestion, questionRequest.getResponse());
+            saveResponse(existingQuestion, questionRequest.getResponse(), respondents);
         }
-
-        // Save the Respondents information
-        saveRespondents(responseDto.getEmail(), existingForm);
 
         // Return success message
         return new MessageResponse("Responses saved successfully!");
@@ -69,23 +72,40 @@ public class Response_Service {
                 .orElseThrow(() -> new EntityNotFoundException("Question not found with ID: " + questionId));
     }
 
-    // Helper method to save a new Response for a given Question
-    private void saveResponse(Questions existingQuestion, String response) {
-        Response newResponse = new Response();
-        newResponse.setResponse(response);
-        newResponse.setQuestions(existingQuestion);
-
-        responseRepository.save(newResponse);
-    }
-
     // Helper method to save Respondents information
-    private void saveRespondents(String email, Form existingForm) {
+    private Respondents saveRespondents(String email, Form existingForm) {
+        // Check if a Respondents with the same email already exists
+        Optional<Respondents> existingRespondent = respondentsRepository.findByEmail(email);
+
+        if (existingRespondent.isPresent()) {
+            throw new RespondentAlreadyExistsException("Respondent with email " + email + " already exists!");
+        }
+
         Respondents respondents = new Respondents();
         respondents.setEmail(email);
         respondents.setForm(existingForm);
 
-        respondentsRepository.save(respondents);
+        return respondentsRepository.save(respondents);
     }
 
+    // Helper method to save a new Response for a given Question
+    private void saveResponse(Questions existingQuestion, String response, Respondents respondents) {
+        Response newResponse = new Response();
+        newResponse.setResponse(response);
+        newResponse.setQuestions(existingQuestion);
+        newResponse.setRespondents(respondents); // Set the respondents field
 
+        responseRepository.save(newResponse);
+    }
+
+    //Delete
+    public void deleteResponse(Long responseId) {
+        if (!responseRepository.existsByResponseId(responseId)) {
+            throw new ResponseNotFoundException("Response with ID " + responseId + " not found.");
+        }
+
+        responseRepository.deleteById(responseId);
+    }
+
+    //Find Respondents
 }
