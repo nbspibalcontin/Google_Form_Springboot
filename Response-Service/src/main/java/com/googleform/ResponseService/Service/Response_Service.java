@@ -7,7 +7,6 @@ import com.googleform.ResponseService.Entity.Respondents;
 import com.googleform.ResponseService.Entity.Response;
 import com.googleform.ResponseService.Exception.FormNotFoundException;
 import com.googleform.ResponseService.Exception.RespondentAlreadyExistsException;
-import com.googleform.ResponseService.Exception.ResponseNotFoundException;
 import com.googleform.ResponseService.Repository.FormRepository;
 import com.googleform.ResponseService.Repository.QuestionsRepository;
 import com.googleform.ResponseService.Repository.RespondentsRepository;
@@ -15,12 +14,14 @@ import com.googleform.ResponseService.Repository.ResponseRepository;
 import com.googleform.ResponseService.Request.QuestionRequest;
 import com.googleform.ResponseService.Request.ResponseRequest;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 
 @Service
+@Slf4j
 public class Response_Service {
     private final QuestionsRepository questionsRepository;
     private final ResponseRepository responseRepository;
@@ -97,15 +98,4 @@ public class Response_Service {
 
         responseRepository.save(newResponse);
     }
-
-    //Delete
-    public void deleteResponse(Long responseId) {
-        if (!responseRepository.existsByResponseId(responseId)) {
-            throw new ResponseNotFoundException("Response with ID " + responseId + " not found.");
-        }
-
-        responseRepository.deleteById(responseId);
-    }
-
-    //Find Respondents
 }

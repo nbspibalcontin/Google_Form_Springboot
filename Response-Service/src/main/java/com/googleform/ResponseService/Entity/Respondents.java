@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -17,7 +20,6 @@ public class Respondents {
     @OneToOne
     @JoinColumn(name = "form_id")
     private Form form;
-    @OneToOne(mappedBy = "respondents", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
-    private Response response;
+    @OneToMany(mappedBy = "respondents", cascade = CascadeType.ALL)
+    private List<Response> responses = new ArrayList<>();
 }
