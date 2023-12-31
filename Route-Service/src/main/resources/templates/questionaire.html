@@ -1,115 +1,150 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form List</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Google Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        /* Add some basic styling for clarity */
+        .input-container {
+            margin-bottom: 10px;
+        }
+        .dynamic-input{
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Form List</h2>
-
-<!-- Iterate over the formDtoList -->
-<div th:each="formDto : ${formDtoList}">
-    <div>
-        <strong>ID:</strong> <span id="formId" class="form-id" th:text="${formDto.id}"></span><br>
-        <strong>Title:</strong> <span th:text="${formDto.title}"></span><br>
-
-        <!-- Display input field for email -->
-        <label>Email:</label>
-        <input type="email" class="form-email" th:id="${'input_email_' + formDto.id}" th:name="${'input_email_' + formDto.id}" placeholder="Enter your email" required>
-        <br>
-
-        <!-- Iterate over the questionsList within each FormDto -->
-        <ul>
-            <li th:each="question : ${formDto.questionsList}">
-                <!-- Display input fields for each question.id and question.question -->
-                <label>ID:</label>
-                <input type="text" class="form-id dynamic-input" th:id="${'input_id_' + question.id}" th:name="${'input_id_' + question.id}" th:value="${question.id}" readonly>
-                <label>Question:</label>
-                <input type="text" class="form-question dynamic-input" th:id="${'input_question_' + question.id}" th:name="${'input_question_' + question.id}" th:value="${question.question}" readonly>
-                <br>
-                <!-- Hidden input field for responseId -->
-                <input type="hidden" class="response-id" th:id="${'input_response_id_' + question.id}" th:name="${'input_response_id_' + question.id}" th:value="${question.id}">
-                <!-- Input field for response -->
-                <label>Response:</label>
-                <input type="text" class="dynamic-input form-control response-input" name="response1" required>
-                <br>
-            </li>
-        </ul>
-
+<!-- Navbar -->
+<nav class="navbar bg-body-tertiary">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Google Form</span>
     </div>
-    <hr>
+</nav>
+
+<!-- Questioner -->
+<div class="container mt-3">
+    <div id="inputContainer">
+        <!-- Initial input field -->
+        <div class="input-container">
+            <label for="inputTitle">Form Title:</label>
+            <input type="text" id="inputTitle" class="form-control" name="inputTitle" required>
+        </div>
+        <div class="input-container">
+            <label>Question :</label>
+            <input type="text" class="dynamic-input form-control" name="input1" required>
+        </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="addInput()">Add New Input</button>
+    <button class="btn btn-success" onclick="submitForm()">Submit Form</button>
+
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
 
-<!-- Add a button to trigger the JavaScript function -->
-<button onclick="submitForm()">Submit Form</button>
 
-<!-- Add the JavaScript function -->
 <script>
-    function submitForm() {
-        // Select the email input element
-        var emailInput = document.querySelector('.form-email');
-        var email = emailInput ? emailInput.value : '';
+    function addInput() {
+        // Create a new input element
+        var newInput = document.createElement('input');
+        newInput.type = 'text';
+        newInput.className = 'dynamic-input form-control';
+        newInput.name = 'dynamicInput';
+        newInput.required = true;
 
-        // Select the span element with the class 'form-id'
-        var formIdElement = document.querySelector('.form-id');
-        var formId = formIdElement ? formIdElement.textContent || formIdElement.innerText : '';
+        // Create a new label element
+        var newLabel = document.createElement('label');
+        newLabel.htmlFor = 'dynamicInput';
+        newLabel.textContent = 'Question :';
 
-        // Select all elements with class 'form-question', 'response-id', and 'response-input'
-        var questionInputs = document.querySelectorAll('.form-question');
-        var responseIdInputs = document.querySelectorAll('.response-id');
-        var responseInputs = document.querySelectorAll('.response-input');
+        // Create a new div container for the input and label
+        var container = document.createElement('div');
+        container.className = 'input-container';
 
-        // Create an array to store the responses
-        var responses = [];
+        // Append the label and input to the container
+        container.appendChild(newLabel);
+        container.appendChild(newInput);
+        container.innerHTML += '<button class="btn btn-danger" onclick="removeInput(this)">Remove</button>';
 
-        // Iterate over the response input elements and collect data
-        responseInputs.forEach(function (element, index) {
-            var responseId = responseIdInputs[index] ? responseIdInputs[index].value : '';
-            var responseValue = element.value;
-
-            // Push the response data to the array
-            responses.push({
-                id: responseId,
-                response: responseValue
-            });
-        });
-
-        // Create the final JSON data structure
-        var jsonData = {
-            formId: formId,
-            email: email,
-            responses: responses
-        };
-
-        const url = 'http://localhost:8080/api/response/question-response'; // Fix: Close the quote
-
-        // Use fetch API to send the JSON data to the backend
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(jsonData),
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(responseData => {
-            console.log('Backend response:', responseData);
-            alert('Form submitted successfully!');
-        })
-        .catch(error => {
-            console.error('Error during fetch:', error);
-            alert('Error submitting form. Please try again.');
-        });
+        // Append the container to the main inputContainer div
+        document.getElementById('inputContainer').appendChild(container);
     }
+
+    function removeInput(button) {
+        // Get the parent container and remove it
+        var container = button.parentNode;
+        container.parentNode.removeChild(container);
+    }
+
+    function submitForm() {
+    // Get the value of the title input
+    var title = document.getElementById('inputTitle').value;
+
+     // Check if the title field is empty
+    if (title.trim() === "") {
+        alert("Please fill in the Form Title.");
+        return; // Stop execution if the title field is empty
+    }
+
+    // Get all input elements with class 'dynamic-input'
+    var dynamicInputs = document.getElementsByClassName('dynamic-input');
+
+    // Check if any required field is empty
+    for (var i = 0; i < dynamicInputs.length; i++) {
+        if (dynamicInputs[i].value.trim() === "") {
+            alert("Please fill in all required fields.");
+            return; // Stop execution if any required field is empty
+        }
+    }
+
+    // Create an array to store the input values
+    var questionsList = [];
+
+    // Iterate over the input elements and add their values to the array
+    for (var i = 0; i < dynamicInputs.length; i++) {
+        var question = dynamicInputs[i].value;
+        var questionObject = { "question": question };
+        questionsList.push(questionObject);
+    }
+
+    // Create an object to represent the form data
+    var formObject = {
+        title: title,
+        questionsList: questionsList
+    };
+
+    // Make an HTTP POST request to the controller endpoint
+    fetch('http://localhost:8080/api/form/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formObject)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+
+        // Clear all form inputs
+        document.getElementById('inputTitle').value = "";
+        for (var i = 0; i < dynamicInputs.length; i++) {
+            dynamicInputs[i].value = "";
+        }
+
+        console.log('Success:', data);
+        // Handle success response
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        // Handle error
+    });
+}
+
 </script>
-
-
 </body>
 </html>

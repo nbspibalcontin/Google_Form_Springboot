@@ -21,7 +21,7 @@ public class PageController {
 
     @GetMapping("/home")
     public ModelAndView index() {
-        return new ModelAndView("index");
+        return new ModelAndView("questionaire");
     }
 
     @GetMapping("/getQuestions/{code}")
@@ -33,7 +33,7 @@ public class PageController {
             model.addAttribute("formDtoList", formDtoList);
 
             // Specify the view name (replace "yourViewName" with your actual view name)
-            return new ModelAndView("questionaire", model.asMap());
+            return new ModelAndView("response", model.asMap());
 
         } catch (WebClientException e) {
             // Handle WebClientException (or its subclasses) if needed
