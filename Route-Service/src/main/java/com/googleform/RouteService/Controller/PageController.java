@@ -3,22 +3,19 @@ package com.googleform.RouteService.Controller;
 
 import com.googleform.RouteService.Dto.FormDto;
 import com.googleform.RouteService.Exception.WebClientException;
-import com.googleform.RouteService.Service.Form_Service;
-import org.springframework.http.ResponseEntity;
+import com.googleform.RouteService.Service.Route_Service;
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
 @RestController
 public class PageController {
-   private final Form_Service formService;
+   private final Route_Service formService;
 
-    public PageController(Form_Service formService) {
+    public PageController(Route_Service formService) {
         this.formService = formService;
     }
 
@@ -40,8 +37,9 @@ public class PageController {
 
         } catch (WebClientException e) {
             // Handle WebClientException (or its subclasses) if needed
-            model.addAttribute("error", e.getMessage());
+            model.addAttribute("notfound", e.getMessage());
             return new ModelAndView("notfound", model.asMap());
         }
     }
+
 }

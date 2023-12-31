@@ -1,17 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error Page</title>
+    <title>Not Found</title>
 </head>
 <body>
-
-<h2>Error Page</h2>
-
-<div th:if="${error}">
-    <p th:text="${error}"></p>
-</div>
-
+<h2>Not Found</h2>
+<div th:text="${notfound}"></div>
 </body>
 </html>

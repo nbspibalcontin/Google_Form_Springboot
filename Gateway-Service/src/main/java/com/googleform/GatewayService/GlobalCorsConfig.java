@@ -13,7 +13,7 @@ public class GlobalCorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowCredentials(true);
-        corsConfig.addAllowedOrigin("*"); // Replace with your frontend origin
+        corsConfig.addAllowedOrigin("http://localhost:8082"); // Replace with your frontend origin
         corsConfig.addAllowedHeader("*");
         corsConfig.addAllowedMethod("*");
 

@@ -12,23 +12,104 @@
 <!-- Iterate over the formDtoList -->
 <div th:each="formDto : ${formDtoList}">
     <div>
-        <strong>ID:</strong> <span th:text="${formDto.id}"></span><br>
+        <strong>ID:</strong> <span id="formId" class="form-id" th:text="${formDto.id}"></span><br>
         <strong>Title:</strong> <span th:text="${formDto.title}"></span><br>
+
+        <!-- Display input field for email -->
+        <label>Email:</label>
+        <input type="email" class="form-email" th:id="${'input_email_' + formDto.id}" th:name="${'input_email_' + formDto.id}" placeholder="Enter your email" required>
+        <br>
 
         <!-- Iterate over the questionsList within each FormDto -->
         <ul>
             <li th:each="question : ${formDto.questionsList}">
-                <!-- Display question and its ID -->
-                <span th:text="${question.id}"></span> - <span th:text="${question.question}"></span>
-                <!-- Create individual inputs for each question.id and question.question -->
-                <input type="text" th:id="${'input_id_' + question.id}" th:name="${'input_id_' + question.id}" th:value="${question.id}">
-                <input type="text" th:id="${'input_question_' + question.id}" th:name="${'input_question_' + question.id}" th:value="${question.question}">
+                <!-- Display input fields for each question.id and question.question -->
+                <label>ID:</label>
+                <input type="text" class="form-id dynamic-input" th:id="${'input_id_' + question.id}" th:name="${'input_id_' + question.id}" th:value="${question.id}" readonly>
+                <label>Question:</label>
+                <input type="text" class="form-question dynamic-input" th:id="${'input_question_' + question.id}" th:name="${'input_question_' + question.id}" th:value="${question.question}" readonly>
+                <br>
+                <!-- Hidden input field for responseId -->
+                <input type="hidden" class="response-id" th:id="${'input_response_id_' + question.id}" th:name="${'input_response_id_' + question.id}" th:value="${question.id}">
+                <!-- Input field for response -->
+                <label>Response:</label>
+                <input type="text" class="dynamic-input form-control response-input" name="response1" required>
                 <br>
             </li>
         </ul>
+
     </div>
     <hr>
 </div>
+
+<!-- Add a button to trigger the JavaScript function -->
+<button onclick="submitForm()">Submit Form</button>
+
+<!-- Add the JavaScript function -->
+<script>
+    function submitForm() {
+        // Select the email input element
+        var emailInput = document.querySelector('.form-email');
+        var email = emailInput ? emailInput.value : '';
+
+        // Select the span element with the class 'form-id'
+        var formIdElement = document.querySelector('.form-id');
+        var formId = formIdElement ? formIdElement.textContent || formIdElement.innerText : '';
+
+        // Select all elements with class 'form-question', 'response-id', and 'response-input'
+        var questionInputs = document.querySelectorAll('.form-question');
+        var responseIdInputs = document.querySelectorAll('.response-id');
+        var responseInputs = document.querySelectorAll('.response-input');
+
+        // Create an array to store the responses
+        var responses = [];
+
+        // Iterate over the response input elements and collect data
+        responseInputs.forEach(function (element, index) {
+            var responseId = responseIdInputs[index] ? responseIdInputs[index].value : '';
+            var responseValue = element.value;
+
+            // Push the response data to the array
+            responses.push({
+                id: responseId,
+                response: responseValue
+            });
+        });
+
+        // Create the final JSON data structure
+        var jsonData = {
+            formId: formId,
+            email: email,
+            responses: responses
+        };
+
+        const url = 'http://localhost:8080/api/response/question-response'; // Fix: Close the quote
+
+        // Use fetch API to send the JSON data to the backend
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jsonData),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(responseData => {
+            console.log('Backend response:', responseData);
+            alert('Form submitted successfully!');
+        })
+        .catch(error => {
+            console.error('Error during fetch:', error);
+            alert('Error submitting form. Please try again.');
+        });
+    }
+</script>
+
 
 </body>
 </html>
