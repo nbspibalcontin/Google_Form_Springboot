@@ -14,7 +14,7 @@ public class Response {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long responseId;
     private String response;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "question_id")
     private Questions questions;
 }

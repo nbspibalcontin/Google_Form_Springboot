@@ -36,30 +36,22 @@ public class Response_Service {
     }
 
     public MessageResponse createResponses(ResponseRequest responseDto) {
-        // Retrieve the existing Form based on the provided form ID
         Form existingForm = getExistingForm(responseDto.getFormId());
+        Respondents respondents = null;
 
-        // Save the Respondents information
-        Respondents respondents = saveRespondents(responseDto.getEmail(), existingForm);
-
-        // Iterate through each question response in the request
         for (QuestionRequest questionRequest : responseDto.getResponses()) {
-            // Retrieve the existing Question based on the provided question ID
-            Questions existingQuestion = getExistingQuestion(questionRequest.getId());
+            Questions existingQuestion = getExistingQuestion(questionRequest.getQuestionId());
 
-            // Check if a Response with the same ID already exists
-            if (responseRepository.existsById(questionRequest.getId())) {
-                // Handle the case where a response with the same ID already exists
-                return new MessageResponse("Response with ID " + questionRequest.getId() + " already exists!");
+            if (respondents == null) {
+                respondents = saveRespondents(responseDto.getEmail(), existingForm);
             }
 
-            // Save the new Response for the current question
             saveResponse(existingQuestion, questionRequest.getResponse(), respondents);
         }
 
-        // Return success message
         return new MessageResponse("Responses saved successfully!");
     }
+
 
     // Helper method to retrieve an existing Form based on ID
     private Form getExistingForm(Long formId) {
@@ -76,11 +68,11 @@ public class Response_Service {
     // Helper method to save Respondents information
     private Respondents saveRespondents(String email, Form existingForm) {
         // Check if a Respondents with the same email already exists
-        Optional<Respondents> existingRespondent = respondentsRepository.findByEmail(email);
-
-        if (existingRespondent.isPresent()) {
-            throw new RespondentAlreadyExistsException("Respondent with email " + email + " already exists!");
-        }
+//        Optional<Respondents> existingRespondent = respondentsRepository.findByEmail(email);
+//
+//        if (existingRespondent.isPresent()) {
+//            throw new RespondentAlreadyExistsException("Respondent with email " + email + " already exists!");
+//        }
 
         Respondents respondents = new Respondents();
         respondents.setEmail(email);

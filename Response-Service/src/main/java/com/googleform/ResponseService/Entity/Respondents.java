@@ -17,7 +17,7 @@ public class Respondents {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String email;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "form_id")
     private Form form;
     @OneToMany(mappedBy = "respondents", cascade = CascadeType.ALL)

@@ -33,6 +33,10 @@ public class Route_Service {
         }
     }
 
-    //TODO create a delete html
-    //TODO create a response html
+    //TODO create validation in response html
+
+    //ADMIN
+
+    //TODO create a CRUD
+    //TODO DESIGN HTML FILES
 }

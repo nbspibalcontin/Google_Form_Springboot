@@ -3,47 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>Form List</title>
 </head>
 <body>
 
-<h2>Form List</h2>
+<div class="container">
+    <h2>Form List</h2>
 
-<!-- Iterate over the formDtoList -->
-<div th:each="formDto : ${formDtoList}">
-    <div>
-        <strong>ID:</strong> <span id="formId" class="form-id" th:text="${formDto.id}"></span><br>
-        <strong>Title:</strong> <span th:text="${formDto.title}"></span><br>
+    <!-- Iterate over the formDtoList -->
+    <div th:each="formDto : ${formDtoList}">
+        <div class="mb-4">
+            <strong>ID:</strong> <span id="formId" class="form-id font-weight-bold" th:text="${formDto.id}"></span><br>
+            <strong>Title:</strong> <span class="font-italic" th:text="${formDto.title}"></span><br>
 
-        <!-- Display input field for email -->
-        <label>Email:</label>
-        <input type="email" class="form-email" th:id="${'input_email_' + formDto.id}" th:name="${'input_email_' + formDto.id}" placeholder="Enter your email" required>
-        <br>
+            <!-- Display input field for email -->
+            <div class="form-group">
+                <label for="${'input_email_' + formDto.id}">Email:</label>
+                <input type="email" class="form-control form-email" id="${'input_email_' + formDto.id}"
+                       name="${'input_email_' + formDto.id}" placeholder="Enter your email" required>
+            </div>
+            <br>
 
-        <!-- Iterate over the questionsList within each FormDto -->
-        <ul>
-            <li th:each="question : ${formDto.questionsList}">
-                <!-- Display input fields for each question.id and question.question -->
-                <label>ID:</label>
-                <input type="text" class="form-id dynamic-input" th:id="${'input_id_' + question.id}" th:name="${'input_id_' + question.id}" th:value="${question.id}" readonly>
-                <label>Question:</label>
-                <input type="text" class="form-question dynamic-input" th:id="${'input_question_' + question.id}" th:name="${'input_question_' + question.id}" th:value="${question.question}" readonly>
-                <br>
-                <!-- Hidden input field for responseId -->
-                <input type="hidden" class="response-id" th:id="${'input_response_id_' + question.id}" th:name="${'input_response_id_' + question.id}" th:value="${question.id}">
-                <!-- Input field for response -->
-                <label>Response:</label>
-                <input type="text" class="dynamic-input form-control response-input" name="response1" required>
-                <br>
-            </li>
-        </ul>
+            <!-- Iterate over the questionsList within each FormDto -->
+            <ul class="list-group">
+                <li th:each="question : ${formDto.questionsList}" class="list-group-item">
+                    <!-- Display question using h2 instead of input -->
+                    <h2 th:id="${'question_' + question.id}" th:text="${question.question}" class="form-question dynamic-input font-weight-normal" readonly></h2>
+                    <br>
 
+                    <!-- Hidden input field for question ID -->
+                    <input type="hidden" class="form-id dynamic-input" th:id="${'input_id_' + question.id}"
+                           th:name="${'input_id_' + question.id}" th:value="${question.id}" readonly>
+
+                    <!-- Hidden input field for response ID -->
+                    <input type="hidden" class="response-id" th:id="${'input_response_id_' + question.id}"
+                           th:name="${'input_response_id_' + question.id}" th:value="${question.id}">
+
+                    <!-- Input field for response -->
+                    <div class="form-group">
+                        <label for="${'response_' + question.id}">Response:</label>
+                        <input type="text" class="dynamic-input form-control response-input" id="${'response_' + question.id}" name="response1" required>
+                    </div>
+                    <br>
+                </li>
+            </ul>
+
+        </div>
+        <hr>
     </div>
-    <hr>
-</div>
 
-<!-- Add a button to trigger the JavaScript function -->
-<button onclick="submitForm()">Submit Form</button>
+    <!-- Add a button to trigger the JavaScript function -->
+    <button class="btn btn-primary" onclick="submitForm()">Submit Form</button>
+</div>
 
 <!-- Add the JavaScript function -->
 <script>
@@ -51,6 +64,12 @@
         // Select the email input element
         var emailInput = document.querySelector('.form-email');
         var email = emailInput ? emailInput.value : '';
+
+        // Validate that the email is not empty
+        if (!email) {
+            alert('Please enter your email.');
+            return; // Stop the function if validation fails
+        }
 
         // Select the span element with the class 'form-id'
         var formIdElement = document.querySelector('.form-id');
@@ -60,6 +79,15 @@
         var questionInputs = document.querySelectorAll('.form-question');
         var responseIdInputs = document.querySelectorAll('.response-id');
         var responseInputs = document.querySelectorAll('.response-input');
+
+        // Validate that all response inputs are not empty
+        for (var i = 0; i < responseInputs.length; i++) {
+            var responseValue = responseInputs[i].value;
+            if (!responseValue) {
+                alert('Please fill in all response fields.');
+                return; // Stop the function if validation fails
+            }
+        }
 
         // Create an array to store the responses
         var responses = [];
@@ -71,7 +99,7 @@
 
             // Push the response data to the array
             responses.push({
-                id: responseId,
+                questionId: responseId,
                 response: responseValue
             });
         });
@@ -102,6 +130,14 @@
         .then(responseData => {
             console.log('Backend response:', responseData);
             alert('Form submitted successfully!');
+
+            // Reset the input values after form submission
+            emailInput.value = '';
+
+            // Iterate over the response input elements and reset their values
+            responseInputs.forEach(function (element) {
+                element.value = '';
+            });
         })
         .catch(error => {
             console.error('Error during fetch:', error);
@@ -109,6 +145,10 @@
         });
     }
 </script>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-wHAiFfRl/MxJhS6+cQDMxjwxhZcJzHkBE5Q5l/6UZ5dNyJc1+M//AeWIJZ2Iep0" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 
 </body>

@@ -20,7 +20,6 @@ public class Form {
     private String code;
     @OneToMany(mappedBy = "form", cascade = CascadeType.ALL)
     private List<Questions> questionsList = new ArrayList<>();
-    @OneToOne(mappedBy = "form", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
-    private Respondents respondents;
+    @OneToMany(mappedBy = "form", cascade = CascadeType.ALL)
+    private List<Respondents> respondents = new ArrayList<>();
 }
