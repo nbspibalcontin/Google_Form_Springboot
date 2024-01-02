@@ -5,19 +5,21 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-public class Response {
+public class Respondents {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String response;
+    private String email;
     @ManyToOne
-    @JoinColumn(name = "question_id")
-    private Questions questions;
-    @ManyToOne
-    @JoinColumn(name = "respondents_id")
-    private Respondents respondents;
+    @JoinColumn(name = "form_id")
+    private Form form;
+    @OneToMany(mappedBy = "respondents", cascade = CascadeType.ALL)
+    private List<Response> responses = new ArrayList<>();
 }

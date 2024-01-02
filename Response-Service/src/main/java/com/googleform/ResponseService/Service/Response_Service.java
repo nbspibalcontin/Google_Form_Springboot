@@ -109,7 +109,7 @@ public class Response_Service {
                 String updatedResponse = updateResponseDTO.getUpdatedResponse();
 
                 Response response = responses.stream()
-                        .filter(r -> r.getResponseId().equals(responseId))
+                        .filter(r -> r.getId().equals(responseId))
                         .findFirst()
                         .orElseThrow(() -> new ResponseNotFoundException("Response with ID " + responseId + " not found"));
 

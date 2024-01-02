@@ -1,16 +1,19 @@
 package com.googleform.FormService.Service;
 
 import com.googleform.FormService.Dto.*;
+import com.googleform.FormService.Entity.Questions;
+import com.googleform.FormService.Entity.Response;
 import com.googleform.FormService.Exception.QuestionNotFoundException;
 import com.googleform.FormService.Request.FormRequest;
 import com.googleform.FormService.Entity.Form;
-import com.googleform.FormService.Entity.Questions;
+
 import com.googleform.FormService.Exception.CodeNotFoundException;
 import com.googleform.FormService.Exception.FormCreationException;
 import com.googleform.FormService.Exception.FormNotFoundException;
 import com.googleform.FormService.Repository.FormRepository;
 import com.googleform.FormService.Repository.QuestionsRepository;
 import com.googleform.FormService.Request.QuestionsRequest;
+import org.aspectj.weaver.patterns.TypePatternQuestions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -86,9 +89,10 @@ public class Form_Service {
     }
 
     //Find All FormWithQuestionsAndResponse
-    public List<FormWithResponseDto> FormWithQuestionsAndResponse(){
-        List<Form> formList = formRepository.findAll();
-        return formList.stream().map(this::convertToFormWithQuestionsAndResponseDto).collect(Collectors.toList());
+    public List<FormWithResponseDto> FormWithQuestionsAndResponse() {
+        return formRepository.findAll().stream()
+                .map(this::convertToFormWithQuestionsAndResponseDto)
+                .collect(Collectors.toList());
     }
 
     //Find Form By Code
@@ -184,6 +188,8 @@ public class Form_Service {
             }
         }
     }
+
+    //Update Questions
     private List<Questions> updateQuestions(List<Questions> existingQuestions, List<QuestionsRequest> updateQuestionRequests) {
         Set<Long> existingQuestionIds = existingQuestions.stream().map(Questions::getId).collect(Collectors.toSet());
 

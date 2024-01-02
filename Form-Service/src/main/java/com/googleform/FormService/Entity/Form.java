@@ -20,4 +20,6 @@ public class Form {
     private String code;
     @OneToMany(mappedBy = "form", cascade = CascadeType.ALL)
     private List<Questions> questionsList = new ArrayList<>();
+    @OneToMany(mappedBy = "form", cascade = CascadeType.ALL)
+    private List<Respondents> respondents = new ArrayList<>();
 }

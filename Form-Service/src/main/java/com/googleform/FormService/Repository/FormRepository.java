@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface FormRepository extends JpaRepository<Form, Long> {
     List<Form> findByCode(String code);
+
 }
