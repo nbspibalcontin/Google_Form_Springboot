@@ -102,7 +102,6 @@ public class Form_Service {
         return forms.stream().map(this::convertToFormRequest).collect(Collectors.toList());
     }
 
-
     //Find Form with questions
     public Optional<FormDto> getFormByIdWithQuestions(Long id) {
         Optional<Form> formOptional = formRepository.findById(id);

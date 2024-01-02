@@ -7,17 +7,25 @@ import com.googleform.ResponseService.Entity.Respondents;
 import com.googleform.ResponseService.Entity.Response;
 import com.googleform.ResponseService.Exception.FormNotFoundException;
 import com.googleform.ResponseService.Exception.RespondentAlreadyExistsException;
+import com.googleform.ResponseService.Exception.ResponseNotFoundException;
 import com.googleform.ResponseService.Repository.FormRepository;
 import com.googleform.ResponseService.Repository.QuestionsRepository;
 import com.googleform.ResponseService.Repository.RespondentsRepository;
 import com.googleform.ResponseService.Repository.ResponseRepository;
 import com.googleform.ResponseService.Request.QuestionRequest;
 import com.googleform.ResponseService.Request.ResponseRequest;
+import com.googleform.ResponseService.Request.UpdateRequest;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -68,11 +76,11 @@ public class Response_Service {
     // Helper method to save Respondents information
     private Respondents saveRespondents(String email, Form existingForm) {
         // Check if a Respondents with the same email already exists
-//        Optional<Respondents> existingRespondent = respondentsRepository.findByEmail(email);
-//
-//        if (existingRespondent.isPresent()) {
-//            throw new RespondentAlreadyExistsException("Respondent with email " + email + " already exists!");
-//        }
+        Optional<Respondents> existingRespondent = respondentsRepository.findByEmail(email);
+
+        if (existingRespondent.isPresent()) {
+            throw new RespondentAlreadyExistsException("Respondent with email " + email + " already exists!");
+        }
 
         Respondents respondents = new Respondents();
         respondents.setEmail(email);
@@ -86,10 +94,32 @@ public class Response_Service {
         Response newResponse = new Response();
         newResponse.setResponse(response);
         newResponse.setQuestions(existingQuestion);
-        newResponse.setRespondents(respondents); // Set the respondents field
+        newResponse.setRespondents(respondents);
 
         responseRepository.save(newResponse);
     }
 
     //TODO Create update function for response
+    public void updateResponsesByRespondentId(Long respondentId, List<UpdateRequest> updateResponseDTOs) {
+        List<Response> responses = responseRepository.findByRespondentsId(respondentId);
+
+        if (!responses.isEmpty()) {
+            for (UpdateRequest updateResponseDTO : updateResponseDTOs) {
+                Long responseId = updateResponseDTO.getResponseId();
+                String updatedResponse = updateResponseDTO.getUpdatedResponse();
+
+                Response response = responses.stream()
+                        .filter(r -> r.getResponseId().equals(responseId))
+                        .findFirst()
+                        .orElseThrow(() -> new ResponseNotFoundException("Response with ID " + responseId + " not found"));
+
+                response.setResponse(updatedResponse);
+            }
+
+            responseRepository.saveAll(responses);
+        } else {
+            // Handle the case where no responses are found for the given respondentId
+            throw new ResponseNotFoundException("Responses for Respondent ID " + respondentId + " not found");
+        }
+    }
 }
