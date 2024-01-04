@@ -1,19 +1,19 @@
 package com.googleform.FormService.Service;
 
 import com.googleform.FormService.Dto.*;
-import com.googleform.FormService.Entity.Questions;
-import com.googleform.FormService.Entity.Response;
-import com.googleform.FormService.Exception.QuestionNotFoundException;
-import com.googleform.FormService.Request.FormRequest;
 import com.googleform.FormService.Entity.Form;
-
+import com.googleform.FormService.Entity.Questions;
+import com.googleform.FormService.Entity.Respondents;
+import com.googleform.FormService.Entity.Response;
 import com.googleform.FormService.Exception.CodeNotFoundException;
 import com.googleform.FormService.Exception.FormCreationException;
 import com.googleform.FormService.Exception.FormNotFoundException;
+import com.googleform.FormService.Exception.QuestionNotFoundException;
 import com.googleform.FormService.Repository.FormRepository;
 import com.googleform.FormService.Repository.QuestionsRepository;
+import com.googleform.FormService.Repository.RespondentsRepository;
+import com.googleform.FormService.Request.FormRequest;
 import com.googleform.FormService.Request.QuestionsRequest;
-import org.aspectj.weaver.patterns.TypePatternQuestions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -29,12 +29,13 @@ public class Form_Service {
 
     private final FormRepository formRepository;
     private final QuestionsRepository questionsRepository;
-
+    private final RespondentsRepository respondentsRepository;
     private final ModelMapper modelMapper;
 
-    public Form_Service(FormRepository formRepository, QuestionsRepository questionsRepository, ModelMapper modelMapper) {
+    public Form_Service(FormRepository formRepository, QuestionsRepository questionsRepository, RespondentsRepository respondentsRepository, ModelMapper modelMapper) {
         this.formRepository = formRepository;
         this.questionsRepository = questionsRepository;
+        this.respondentsRepository = respondentsRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -83,21 +84,41 @@ public class Form_Service {
     }
 
     //Find All Form
-    public List<FormDto> findAllForms(){
-        List<Form> formList = formRepository.findAll();
-        return formList.stream().map(this::convertToFormDto).collect(Collectors.toList());
+    public List<FormDto> findAllForms() {
+        try {
+            List<Form> formList = formRepository.findAll();
+
+            if (formList.isEmpty()) {
+                throw new FormNotFoundException("No forms found");
+            }
+
+            return formList.stream().map(this::convertToFormDto).collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error while processing forms", e);
+        }
     }
 
     //Find All FormWithQuestionsAndResponse
     public List<FormWithResponseDto> FormWithQuestionsAndResponse() {
-        return formRepository.findAll().stream()
-                .map(this::convertToFormWithQuestionsAndResponseDto)
-                .collect(Collectors.toList());
+        try {
+            List<Form> formList = formRepository.findAll();
+
+            if (formList.isEmpty()) {
+                throw new FormNotFoundException("No forms found");
+            }
+
+            return formList.stream().map(this::convertToFormWithQuestionsAndResponseDto).collect(Collectors.toList());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error while processing forms", e);
+        }
+
     }
 
     //Find Form By Code
     public List<FormRequest> getFormByCode(String code) {
-        List<Form> forms = formRepository.findByCode(code);
+        List<Form> forms = formRepository.findFormsByCode(code);
 
         if (forms.isEmpty()) {
             throw new CodeNotFoundException("No Form found containing: " + code);
@@ -125,22 +146,10 @@ public class Form_Service {
     }
 
     //Find Form with questions and Response
-    public Optional<FormWithResponseDto> getFormByIdWithQuestionsAndResponse(Long id) {
-        Optional<Form> formOptional = formRepository.findById(id);
+    public Optional<FormWithResponseDto> getFormByIdWithQuestionsAndResponse(String code) {
+        Optional<Form> formOptional = formRepository.findFormByCode(code);
 
-        if (formOptional.isEmpty()) {
-            throw new FormNotFoundException("No Form found with Id: " + id);
-        }
-
-        Form form = formOptional.get();
-        List<QuestionsWithResponseDto> questionsList = extractQuestionsWithResponse(form.getQuestionsList());
-
-        // Use ModelMapper to map Form to FormWithQuestions
-
-        FormWithResponseDto formWithQuestionsAndResponse = modelMapper.map(form, FormWithResponseDto.class);
-        formWithQuestionsAndResponse.setQuestionsList(questionsList);
-
-        return Optional.of(formWithQuestionsAndResponse);
+        return formOptional.map(this::convertToFormWithQuestionsAndResponseDto2);
     }
 
     //Delete Form
@@ -212,16 +221,25 @@ public class Form_Service {
 
     //Mapping Question and QuestionDto
     private List<QuestionsDto> extractQuestionsWithId(List<Questions> questionsList) {
-        return questionsList.stream()
-                .map(question -> modelMapper.map(question, QuestionsDto.class))
-                .collect(Collectors.toList());
+        return questionsList.stream().map(question -> modelMapper.map(question, QuestionsDto.class)).collect(Collectors.toList());
     }
 
     private List<QuestionsWithResponseDto> extractQuestionsWithResponse(List<Questions> questionsList) {
         return questionsList.stream()
-                .map(question -> modelMapper.map(question, QuestionsWithResponseDto.class))
+                .map(question -> {
+                    QuestionsWithResponseDto questionDto = modelMapper.map(question, QuestionsWithResponseDto.class);
+                    questionDto.setResponses(extractResponses(question.getResponses()));
+                    return questionDto;
+                })
                 .collect(Collectors.toList());
     }
+
+    private List<ResponseDto> extractResponses(List<Response> responses) {
+        return responses.stream()
+                .map(response -> modelMapper.map(response, ResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
 
     //Convert Form to FormDto
     private FormDto convertToFormDto(Form form) {
@@ -231,6 +249,55 @@ public class Form_Service {
     //Convert Form to FormWithQuestionsAndResponseDto
     private FormWithResponseDto convertToFormWithQuestionsAndResponseDto(Form form) {
         return modelMapper.map(form, FormWithResponseDto.class);
+    }
+
+    private FormWithResponseDto convertToFormWithQuestionsAndResponseDto2(Form form) {
+        FormWithResponseDto formDto = new FormWithResponseDto();
+        formDto.setId(form.getId());
+        formDto.setTitle(form.getTitle());
+        formDto.setCode(form.getCode());
+
+        Long totalRespondent = respondentsRepository.countByFormId(form.getId());
+        formDto.setTotalRespondent(totalRespondent);
+
+        List<QuestionsWithResponseDto> questionDtoList = form.getQuestionsList()
+                .stream()
+                .map(this::convertToQuestionWithResponseDto)
+                .collect(Collectors.toList());
+
+        formDto.setQuestionsList(questionDtoList);
+
+        return formDto;
+    }
+
+    private QuestionsWithResponseDto convertToQuestionWithResponseDto(Questions question) {
+        QuestionsWithResponseDto questionDto = new QuestionsWithResponseDto();
+        questionDto.setId(question.getId());
+        questionDto.setQuestion(question.getQuestion());
+
+        List<ResponseDto> responseDtoList = question.getResponses()
+                .stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
+
+        questionDto.setResponses(responseDtoList);
+
+        return questionDto;
+    }
+
+    private ResponseDto convertToResponseDto(Response response) {
+        ResponseDto responseDto = new ResponseDto();
+        responseDto.setId(response.getId());
+        responseDto.setResponse(response.getResponse());
+
+        Respondents respondents = response.getRespondents();
+        if (respondents != null) {
+            responseDto.setRespondentEmail(respondents.getEmail());
+        }
+
+        // You may include other response properties if needed
+
+        return responseDto;
     }
 
     //Convert Form to FormRequest

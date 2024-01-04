@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FormRepository extends JpaRepository<Form, Long> {
-    List<Form> findByCode(String code);
-
+    List<Form> findFormsByCode(String code);
+    Optional<Form> findFormByCode(String code);
 }

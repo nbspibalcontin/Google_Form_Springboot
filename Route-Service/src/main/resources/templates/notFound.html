@@ -1,0 +1,19 @@
+<!-- notFound.html (Thymeleaf template) -->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Add your head content here -->
+</head>
+<body>
+
+<!-- Your page content here -->
+
+<script th:if="${notFound != null}" th:inline="javascript">
+    /*<![CDATA[*/
+    alert([[${notFound}]]);
+    /*]]>*/
+</script>
+
+</body>
+</html>

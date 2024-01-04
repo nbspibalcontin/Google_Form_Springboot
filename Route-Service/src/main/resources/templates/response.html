@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <title>Form List</title>
+    <title>Form Response</title>
 </head>
 <body>
 
 <div class="container">
-    <h2>Form List</h2>
+    <h2>Form Response</h2>
 
     <!-- Iterate over the formDtoList -->
     <div th:each="formDto : ${formDtoList}">
         <div class="mb-4">
-            <strong>ID:</strong> <span id="formId" class="form-id font-weight-bold" th:text="${formDto.id}"></span><br>
-            <strong>Title:</strong> <span class="font-italic" th:text="${formDto.title}"></span><br>
+            <strong>Form ID:</strong> <span id="formId" class="form-id font-weight-bold" th:text="${formDto.id}"></span><br>
+            <strong>Form Title:</strong> <span class="font-italic" th:text="${formDto.title}"></span><br>
 
             <!-- Display input field for email -->
             <div class="form-group">
@@ -122,14 +122,27 @@
             body: JSON.stringify(jsonData),
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+ if (!response.ok) {
+            // If the response is not ok, and status is 409 (Conflict), handle the error
+            if (response.status === 409) {
+                return response.json().then(errorData => {
+                    const errorMessage = errorData.message || errorData.error;
+                    console.error(`HTTP error! Status: ${response.status}, Message: ${errorMessage}`);
+                    throw new Error(errorMessage);
+                });
+            } else {
+                // For other errors, handle as usual
+                return response.json().then(errorData => {
+                    console.error(`HTTP error! Status: ${response.status}, Message: ${errorData.message}`);
+                    throw new Error(errorData.message);
+                });
             }
-            return response.json();
+        }
+        return response.json();
         })
         .then(responseData => {
             console.log('Backend response:', responseData);
-            alert('Form submitted successfully!');
+            alert(responseData.message);
 
             // Reset the input values after form submission
             emailInput.value = '';
@@ -140,8 +153,8 @@
             });
         })
         .catch(error => {
-            console.error('Error during fetch:', error);
-            alert('Error submitting form. Please try again.');
+            console.error('Error during fetch:', error.message);
+            alert(`${error.message}`);
         });
     }
 </script>

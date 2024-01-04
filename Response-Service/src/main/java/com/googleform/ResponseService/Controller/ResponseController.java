@@ -1,5 +1,6 @@
 package com.googleform.ResponseService.Controller;
 
+import com.googleform.ResponseService.Dto.ErrorResponse;
 import com.googleform.ResponseService.Dto.MessageResponse;
 import com.googleform.ResponseService.Entity.Response;
 import com.googleform.ResponseService.Exception.FormNotFoundException;
@@ -33,9 +34,9 @@ public class ResponseController {
         try {
             return ResponseEntity.ok(responseService.createResponses(responseDto));
         } catch (RespondentAlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(e.getMessage()));
         } catch (EntityNotFoundException | FormNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
@@ -57,7 +58,7 @@ public class ResponseController {
             responseService.updateResponsesByRespondentId(respondentId, updateResponseRequest);
             return ResponseEntity.ok(new MessageResponse("Updated Successfully!"));
         } catch (ResponseNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e.getMessage()));
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Form Display</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Google Form</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">Form Details</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div th:each="formResponse : ${formResponses}">
+    <p><strong>Form Title:</strong> <span th:text="${formResponse.title}"></span></p>
+
+    <p><strong>Form Code:</strong> <span th:text="${formResponse.code}"></span></p>
+
+    <p><strong>Total Respondents:</strong> <span th:text="${formResponse.totalRespondent}"></span></p>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th scope="col">Respondent Email</th>
+            <th th:each="question : ${formResponse.questionsList}" th:text="${question.question}"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="response : ${formResponse.questionsList[0].responses}">
+            <!-- Display the respondent email for each response -->
+            <td th:text="${response.respondentEmail}"></td>
+            <!-- Loop through each question to display the responses in the corresponding column -->
+            <td th:each="question : ${formResponse.questionsList}">
+                <span th:each="matchingResponse : ${question.responses}" th:if="${matchingResponse.respondentEmail == response.respondentEmail}">
+                    <span th:text="${matchingResponse.response}"></span><br/>
+                </span>
+            </td>
+            <!-- Edit and Delete buttons -->
+            <td><button type="button" class="btn btn-primary">Edit</button></td>
+            <td><button type="button" class="btn btn-danger">Delete</button></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+</body>
+</html>

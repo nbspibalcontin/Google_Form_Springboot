@@ -55,31 +55,35 @@ public class FormController {
         }
     }
 
-    //Find All Form
-    @GetMapping("/allForms")
+    //Find All Form with Question
+    @GetMapping("/allForms/questions")
     public ResponseEntity<?> findAllForms() {
         try {
             return ResponseEntity.ok(form_service.findAllForms());
+        } catch (FormNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
 
     //Find All Form With Response
-    @GetMapping("/allForms/response")
+    @GetMapping("/allForms/responses")
     public ResponseEntity<?> findAllFormsWithResponse() {
         try {
             return ResponseEntity.ok(form_service.FormWithQuestionsAndResponse());
+        } catch (FormNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
     }
 
     //Find Form with questions and Response by Id
-    @GetMapping("/questionAndResponse/{id}")
-    public ResponseEntity<?> findFromWithQuestionAndResponseById(@PathVariable Long id) {
+    @GetMapping("/questionAndResponse/{code}")
+    public ResponseEntity<?> findFromWithQuestionAndResponseById(@PathVariable String code) {
         try {
-            return ResponseEntity.ok(form_service.getFormByIdWithQuestionsAndResponse(id));
+            return ResponseEntity.ok(form_service.getFormByIdWithQuestionsAndResponse(code));
         } catch (FormNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
