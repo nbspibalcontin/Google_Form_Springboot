@@ -293,9 +293,8 @@ public class Form_Service {
         Respondents respondents = response.getRespondents();
         if (respondents != null) {
             responseDto.setRespondentEmail(respondents.getEmail());
+            responseDto.setRespondentId(respondents.getId());
         }
-
-        // You may include other response properties if needed
 
         return responseDto;
     }

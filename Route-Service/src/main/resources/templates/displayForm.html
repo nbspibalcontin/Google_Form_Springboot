@@ -3,6 +3,12 @@
 <head>
     <title>Form Display</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        .hidden {
+            display: none;
+        }
+
+    </style>
 </head>
 <body>
 <!-- Navbar -->
@@ -26,30 +32,96 @@
     <p><strong>Form Code:</strong> <span th:text="${formResponse.code}"></span></p>
 
     <p><strong>Total Respondents:</strong> <span th:text="${formResponse.totalRespondent}"></span></p>
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th scope="col">Respondent Email</th>
-            <th th:each="question : ${formResponse.questionsList}" th:text="${question.question}"></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="response : ${formResponse.questionsList[0].responses}">
-            <!-- Display the respondent email for each response -->
-            <td th:text="${response.respondentEmail}"></td>
-            <!-- Loop through each question to display the responses in the corresponding column -->
-            <td th:each="question : ${formResponse.questionsList}">
-                <span th:each="matchingResponse : ${question.responses}" th:if="${matchingResponse.respondentEmail == response.respondentEmail}">
-                    <span th:text="${matchingResponse.response}"></span><br/>
-                </span>
-            </td>
-            <!-- Edit and Delete buttons -->
-            <td><button type="button" class="btn btn-primary">Edit</button></td>
-            <td><button type="button" class="btn btn-danger">Delete</button></td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">Respondent Id</th>
+                <th scope="col">Respondent Email</th>
+                <th th:each="question : ${formResponse.questionsList}" th:text="${question.question}"></th>
+                <th colspan="2">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="response : ${formResponse.questionsList[0].responses}">
+                <!-- Display the respondent email for each response -->
+                <td th:text="${response.respondentId}"></td>
+                <td th:text="${response.respondentEmail}"></td>
+                <!-- Loop through each question to display the responses in the corresponding column -->
+                <td th:each="question : ${formResponse.questionsList}">
+            <span th:each="matchingResponse : ${question.responses}" th:if="${matchingResponse.respondentEmail == response.respondentEmail}">
+                <span class ="hidden" th:text="${matchingResponse.id}"></span><span th:text="${matchingResponse.response}"></span><br/>
+            </span>
+                </td>
+                <!-- Edit and Delete buttons -->
+                <td>
+                    <button type="button" class="btn btn-primary" onclick="editRespondentEmail(this)">Edit</button>
+                    <button type="button" class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<script>
+    function editRespondentEmail(button) {
+        // Get the closest row to the clicked button
+        var closestRow = button.closest('tr');
+
+        // Find the Respondent ID cell in the row
+        var respondentIdCell = closestRow.querySelector('td:nth-child(1)');
+        // Get the Respondent ID value
+        var respondentId = respondentIdCell.textContent;
+
+        // Find the Respondent Email cell in the row
+        var respondentEmailCell = closestRow.querySelector('td:nth-child(2)');
+        // Get the Respondent Email value
+        var respondentEmail = respondentEmailCell.textContent;
+
+        // Create an array to store the responses
+        var responsesArray = [];
+
+        // Loop through each question column in the row
+        closestRow.querySelectorAll('td:not(:nth-child(1)):not(:nth-child(2)):not(:last-child)').forEach(function (questionCell, index) {
+            // Get the question text
+            var questionText = document.querySelector('thead th:nth-child(' + (index + 3) + ')').textContent.trim();
+
+            // Get the response ID and response value for each question
+            var responseId = questionCell.querySelector('.hidden').textContent; // Assuming you use a class to hide responseId
+            var responseValue = questionCell.querySelector(':not(.hidden)').textContent.trim();
+
+            // Push the response data into the array
+            responsesArray.push({
+                question: questionText,
+                response_Id: responseId,
+                response: responseValue.replace(/^\d+/, '')
+            });
+        });
+
+        // Create a JSON structure with the collected data
+        var jsonData = {
+            respondentId: respondentId,
+            respondentEmail: respondentEmail,
+            responses: responsesArray
+        };
+
+        // Convert JSON data to a query parameter string
+        var jsonDataString = encodeURIComponent(JSON.stringify(jsonData));
+
+        // Build the URL for the receiver page with the query parameter
+        var receiverPageUrl = '/admin/editResponse?jsonData=' + jsonDataString;
+
+        // Navigate to the receiver page with the JSON data
+        window.location.href = receiverPageUrl;
+
+        // Log the JSON data to the console
+        //console.log(JSON.stringify(jsonData, null, 2));
+    }
+</script>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>

@@ -4,9 +4,7 @@ package com.googleform.RouteService.Controller;
 import com.googleform.RouteService.Dto.FormDto;
 import com.googleform.RouteService.Dto.FormWithResponseDto;
 import com.googleform.RouteService.Exception.FormNotFoundException;
-import com.googleform.RouteService.Exception.RespondentAlreadyExistsException;
 import com.googleform.RouteService.Service.Route_Service;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,4 +61,8 @@ public class RouteController {
         return modelAndView;
     }
 
+    @GetMapping("/admin/editResponse")
+    public ModelAndView editDisplayForm() {
+        return new ModelAndView("editdisplayForm");
+    }
 }
