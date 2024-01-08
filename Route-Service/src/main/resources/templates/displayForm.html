@@ -29,7 +29,8 @@
 <div th:each="formResponse : ${formResponses}">
     <p><strong>Form Title:</strong> <span th:text="${formResponse.title}"></span></p>
 
-    <p><strong>Form Code:</strong> <span th:text="${formResponse.code}"></span></p>
+    <!-- Add an ID to the element containing the Form Code -->
+    <p id="formCode"><strong>Form Code:</strong> <span th:text="${formResponse.code}"></span></p>
 
     <p><strong>Total Respondents:</strong> <span th:text="${formResponse.totalRespondent}"></span></p>
     <div class="table-responsive">
@@ -50,7 +51,7 @@
                 <!-- Loop through each question to display the responses in the corresponding column -->
                 <td th:each="question : ${formResponse.questionsList}">
             <span th:each="matchingResponse : ${question.responses}" th:if="${matchingResponse.respondentEmail == response.respondentEmail}">
-                <span class ="hidden" th:text="${matchingResponse.id}"></span><span th:text="${matchingResponse.response}"></span><br/>
+                <span class="hidden responseId" th:text="${matchingResponse.id}"></span><span class="response" th:text="${matchingResponse.response}"></span><br/>
             </span>
                 </td>
                 <!-- Edit and Delete buttons -->
@@ -66,58 +67,67 @@
 
 <script>
     function editRespondentEmail(button) {
-        // Get the closest row to the clicked button
-        var closestRow = button.closest('tr');
+     // Get the closest row to the clicked button
+     var closestRow = button.closest('tr');
 
-        // Find the Respondent ID cell in the row
-        var respondentIdCell = closestRow.querySelector('td:nth-child(1)');
-        // Get the Respondent ID value
-        var respondentId = respondentIdCell.textContent;
+     // Find the Form Code element by its ID
+     var formCodeElement = document.getElementById('formCode');
 
-        // Find the Respondent Email cell in the row
-        var respondentEmailCell = closestRow.querySelector('td:nth-child(2)');
-        // Get the Respondent Email value
-        var respondentEmail = respondentEmailCell.textContent;
+     // Get the Form Code value
+     var formCode = formCodeElement.querySelector('span').textContent;
 
-        // Create an array to store the responses
-        var responsesArray = [];
+     // Find the Respondent ID cell in the row
+     var respondentIdCell = closestRow.querySelector('td:nth-child(1)');
 
-        // Loop through each question column in the row
-        closestRow.querySelectorAll('td:not(:nth-child(1)):not(:nth-child(2)):not(:last-child)').forEach(function (questionCell, index) {
-            // Get the question text
-            var questionText = document.querySelector('thead th:nth-child(' + (index + 3) + ')').textContent.trim();
+     // Get the Respondent ID value
+     var respondentId = respondentIdCell.textContent;
 
-            // Get the response ID and response value for each question
-            var responseId = questionCell.querySelector('.hidden').textContent; // Assuming you use a class to hide responseId
-            var responseValue = questionCell.querySelector(':not(.hidden)').textContent.trim();
+     // Find the Respondent Email cell in the row
+     var respondentEmailCell = closestRow.querySelector('td:nth-child(2)');
+     // Get the Respondent Email value
+     var respondentEmail = respondentEmailCell.textContent;
 
-            // Push the response data into the array
-            responsesArray.push({
-                question: questionText,
-                response_Id: responseId,
-                response: responseValue.replace(/^\d+/, '')
-            });
-        });
+     // Create an array to store the responses
+     var responsesArray = [];
 
-        // Create a JSON structure with the collected data
-        var jsonData = {
-            respondentId: respondentId,
-            respondentEmail: respondentEmail,
-            responses: responsesArray
-        };
+     // Loop through each question column in the row
+     closestRow.querySelectorAll('td:not(:nth-child(1)):not(:nth-child(2)):not(:last-child)').forEach(function (questionCell, index) {
+         // Get the question text
+         var questionText = document.querySelector('thead th:nth-child(' + (index + 3) + ')').textContent.trim();
 
-        // Convert JSON data to a query parameter string
-        var jsonDataString = encodeURIComponent(JSON.stringify(jsonData));
+         // Get the response ID and response value for each question
+         var responseId = questionCell.querySelector('.responseId').textContent;
+         var responseValue = questionCell.querySelector('.response').textContent;
 
-        // Build the URL for the receiver page with the query parameter
-        var receiverPageUrl = '/admin/editResponse?jsonData=' + jsonDataString;
+         // Push the response data into the array
+         responsesArray.push({
+             question: questionText,
+             response_Id: responseId,
+             response: responseValue
+         });
+     });
 
-        // Navigate to the receiver page with the JSON data
-        window.location.href = receiverPageUrl;
+     // Create a JSON structure with the collected data, including the Form Code
+     var jsonData = {
+         formCode: formCode,
+         respondentId: respondentId,
+         respondentEmail: respondentEmail,
+         responses: responsesArray
+     };
 
-        // Log the JSON data to the console
-        //console.log(JSON.stringify(jsonData, null, 2));
-    }
+     // Convert JSON data to a query parameter string
+     var jsonDataString = encodeURIComponent(JSON.stringify(jsonData));
+
+     // Build the URL for the receiver page with the query parameter
+     var receiverPageUrl = '/admin/editResponse?jsonData=' + jsonDataString;
+
+     // Navigate to the receiver page with the JSON data
+     window.location.href = receiverPageUrl;
+
+     // Log the JSON data to the console
+     console.log(JSON.stringify(jsonData, null, 2));
+ }
+
 </script>
 
 

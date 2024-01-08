@@ -1,17 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Received JSON Data</title>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Data Display</title>
 </head>
 <body>
 
-<h2>Received JSON Data</h2>
+<h2>Respondent Information</h2>
+
+<form id="responseForm">
+    <label for="respondentId">Respondent ID:</label>
+    <input type="text" id="respondentId" readonly>
+    <br>
+
+    <label for="respondentEmail">Respondent Email:</label>
+    <input type="text" id="respondentEmail" readonly>
+    <br>
+
+    <h3>Responses</h3>
+
+    <!-- JavaScript will populate this section -->
+    <div id="dynamicResponses"></div>
+
+    <!-- Submit button -->
+    <button type="button" onclick="submitForm()">Submit</button>
+</form>
 
 <script>
-    // Function to get the value of a specific query parameter from the URL
     function getQueryParam(name) {
         var urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
@@ -23,10 +39,67 @@
     // Parse the JSON string to a JavaScript object
     var jsonData = JSON.parse(decodeURIComponent(jsonDataString));
 
-    // Display the JSON data on the HTML page
-    var jsonContainer = document.createElement('pre');
-    jsonContainer.textContent = JSON.stringify(jsonData, null, 2);
-    document.body.appendChild(jsonContainer);
+    // Function to dynamically populate response fields
+    function populateDynamicResponses(responses) {
+        const dynamicResponses = document.getElementById('dynamicResponses');
+
+        responses.forEach(response => {
+            const label = document.createElement('label');
+            label.textContent = response.question;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = response.response;
+
+            // Add line break between each question and its input field
+            dynamicResponses.appendChild(label);
+            dynamicResponses.appendChild(input);
+            dynamicResponses.appendChild(document.createElement('br'));
+        });
+    }
+
+    // Function to handle form submission
+    async function submitForm() {
+        // Retrieve data from response input fields
+        var respondentId = document.getElementById('respondentId').value;
+
+        // Create an array to store updated response data
+        var updatedResponses = [];
+
+        // Iterate through dynamic response input fields
+        var dynamicInputs = document.getElementById('dynamicResponses').getElementsByTagName('input');
+        for (var i = 0; i < dynamicInputs.length; i++) {
+            updatedResponses.push({
+                responseId: jsonData.responses[i].response_Id,
+                updatedResponse: dynamicInputs[i].value
+            });
+        }
+
+        // Make a PUT request to update data
+        const url = 'http://localhost:8080/api/response/update/' + respondentId;
+        const options = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedResponses),
+        };
+
+        try {
+            const response = await fetch(url, options);
+            const result = await response.json();
+            console.log('PUT Request Result:', result);
+            alert(result.message);
+            window.location.href = 'http://localhost:8082/admin/display-form/' + jsonData.formCode;
+        } catch (error) {
+            console.error('Error in PUT Request:', error);
+        }
+    }
+
+    // Populate the form with JSON data
+    document.getElementById('respondentId').value = jsonData.respondentId;
+    document.getElementById('respondentEmail').value = jsonData.respondentEmail;
+    populateDynamicResponses(jsonData.responses);
 </script>
 
 </body>
