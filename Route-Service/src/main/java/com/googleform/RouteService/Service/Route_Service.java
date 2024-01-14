@@ -4,11 +4,13 @@ import com.googleform.RouteService.Dto.FormDto;
 import com.googleform.RouteService.Dto.FormWithResponseDto;
 import com.googleform.RouteService.Exception.FormNotFoundException;
 import com.googleform.RouteService.Exception.WebClientException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -22,6 +24,7 @@ public class Route_Service {
     }
 
     //Get the Questions
+    @CircuitBreaker(name = "getQuestions", fallbackMethod = "fallbackGetQuestions")
     public List<FormDto> getQuestions(String code) {
         try {
             return webClientBuilder.build()
@@ -34,6 +37,13 @@ public class Route_Service {
         } catch (WebClientResponseException.NotFound e) {
             throw new FormNotFoundException(e.getResponseBodyAsString());
         }
+    }
+
+    // Fallback method for the circuit breaker
+    private List<FormDto> fallbackGetQuestions(String code, Exception e) {
+        // Provide a custom fallback response message
+        log.error("Circuit breaker triggered for getQuestions with code {}", code);
+        return Collections.emptyList(); // or return a default list or null
     }
 
     //TODO create validation in response html
@@ -54,7 +64,4 @@ public class Route_Service {
             throw new WebClientException(e.getResponseBodyAsString());
         }
     }
-
-    //TODO create a CRUD
-    //TODO DESIGN HTML FILES
 }

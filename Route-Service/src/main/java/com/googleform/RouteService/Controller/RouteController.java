@@ -42,6 +42,10 @@ public class RouteController {
         } catch (FormNotFoundException e) {
             model.addAttribute("notFound", e.getMessage());
             return new ModelAndView("notFound", model.asMap());
+        } catch (Exception e) {
+            // Handle other exceptions or log them if needed
+            model.addAttribute("errorMessage", "An error occurred while processing your request.");
+            return new ModelAndView("error", model.asMap());
         }
     }
 
